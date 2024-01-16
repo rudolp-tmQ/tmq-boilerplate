@@ -1,0 +1,206 @@
+syntax = "proto3";
+
+option optimize_for = CODE_SIZE;
+
+import "tmq/common.proto";
+
+package tmq;
+
+enum Provider {
+    STRIPE = 0;
+    PAYPAL = 1;
+    AMAZON = 2;
+}
+
+enum Plan {
+    P_FREE = 0;
+    P_PREMIUM = 1;
+}
+
+enum PaymentMethodType {
+    PMT_CARD = 0;
+    PMT_PAYPAL = 1;
+    PMT_AMAZON = 2;
+}
+
+enum PaymentStatus {
+    PS_PENDING = 0;
+    PS_SUCCEEDED = 1;
+    PS_FAILED = 2;
+}
+
+message PaymentMethod {
+    string token = 1;
+    uint64 provider = 2;
+    bool isMain = 3;
+    string type = 4;
+    string holder = 5;
+    string last4 = 6;
+    string cvc = 7;
+    string expiration = 8;
+    string address = 9;
+    string zip = 10;
+}
+
+message Billing {
+    string id = 1;
+    string userId = 2;
+    Plan plan = 3;
+    bool active = 4;
+    int64 remainingBalance = 5;
+    uint64 dtCreated = 6;
+    uint64 dtModified = 7;
+    repeated PaymentMethod paymentMethods = 8;
+    string stripeToken = 9;
+    string paypalToken = 10;
+    string amazonPayToken = 11;
+}
+
+message PaymentMethodRequest {
+    string token = 1;
+    uint64 provider = 2;
+    bool isMain = 3;
+    string cardNumber = 4;
+    string holder = 5;
+    string expiration = 6;
+    string cvc = 7;
+    string zip = 8;
+    string address = 9;
+    ConnectionInfo clientinfo = 10;
+}
+
+message AddFundsRequest {
+    string token = 1;
+    uint64 amount = 2;
+    ConnectionInfo clientinfo = 3;
+}
+
+message InvoiceRequest {
+    string invoiceId = 1;
+    uint64 startDate = 2;
+    uint64 endDate = 3;
+    ConnectionInfo clientinfo = 4;
+}
+
+message InvoiceResponse {
+    message CompanyInfo {
+        string companyName = 1;
+        string companyAddress = 2;
+        string companyPhone = 3;
+        string companyEmail = 4;
+        string vat = 5;
+    }
+    message BillingInfo {
+        string billingName = 1;
+        string billingAddress = 2;
+        string billingPhone = 3;
+        string billingEmail = 4;
+    }
+    message Product {
+        string name = 1;
+        string currency = 2;
+        uint32 amount = 3;
+        uint32 quantity = 4;
+        uint64 startPeriod = 5;
+        uint64 endPeriod = 6;
+        float tax = 7;
+    }
+    float salesTax = 1;
+    float subTotal = 2;
+    float total = 3;
+    uint64 dtIssued = 4;
+    uint64 dtDue = 5;
+    string invoiceId = 6;
+    CompanyInfo companyInfo = 8;
+    BillingInfo billingInfo = 9;
+    repeated Product products = 10;
+}
+
+message PaymentConfigRequest {
+    ConnectionInfo clientinfo = 1;
+}
+
+message PaymentConfig {
+    message PromoCode {
+        string code = 1;
+        string description = 2;
+        float discount = 3;
+        float discountRate = 4;
+    }
+    message Package {
+        string name = 1;
+        string description = 2;
+        uint32 feature = 3;
+        repeated ServiceFees fees = 4;
+    }
+    message ServiceFees {
+        float price = 1;
+        string id = 2;
+        string type = 3;
+        string flag = 4;
+    }
+    float yearlyDiscount = 1;
+    float salesTax = 2;
+    repeated PromoCode promoCodes = 3;
+    repeated Package packages = 4;
+}
+
+message SubscribeUserRequest {
+    bool isYearly = 1;
+    string paymentToken = 2;
+    repeated string products = 3;
+    repeated PaymentConfig.PromoCode promoCode = 4;
+    ConnectionInfo clientinfo = 5;
+}
+
+message PaymentHistory {
+    string id = 1;
+    string userId = 2;
+    uint64 amount = 3;
+    uint64 currentBalance = 4;
+    uint64 provider = 5;
+    string recipient = 6;
+    string paymentDetails = 7;
+    PaymentStatus status = 8;
+    string transactionId = 9;
+    uint64 paymentCreated = 10;
+    uint64 dtCreated = 11;
+    string index1 = 12; //userId + dtCreated
+}
+
+message FetchPaymentHistoriesRequest {
+    string keyword = 1;
+    repeated string ids = 2;
+    uint64 lastBasis = 3;
+    uint64 from = 4;
+    uint64 to = 5;
+    uint64 limit = 6;
+    ConnectionInfo clientinfo = 7;
+}
+
+message FetchPaymentHistoriesResponse {
+    repeated PaymentHistory list = 1;
+}
+
+message InvoicesResponse {
+    repeated InvoiceResponse list = 1;
+}
+
+message ConnectionRequest {
+    ConnectionInfo clientinfo = 1;
+}
+
+service BillingService {
+    rpc AddPaymentMethod (PaymentMethodRequest) returns (DefaultResponse) {}
+    rpc UpdatePaymentMethod (PaymentMethodRequest) returns (DefaultResponse) {}
+    rpc AddFunds (AddFundsRequest) returns (DefaultResponse) {}
+    rpc GetInvoice (InvoiceRequest) returns (InvoiceResponse) {}    
+    rpc GetInvoices (InvoiceRequest) returns (InvoicesResponse) {}
+    rpc GetPaymentConfig(PaymentConfigRequest) returns (PaymentConfig) {}
+    rpc SubscribeUser(SubscribeUserRequest) returns (DefaultResponse) {}
+    rpc FetchPaymentHistories (FetchPaymentHistoriesRequest) returns (FetchPaymentHistoriesResponse) {}
+}
+
+service BillingPublish {
+    rpc GetUserBilling (ConnectionRequest) returns (stream PublishResponse) {}
+}

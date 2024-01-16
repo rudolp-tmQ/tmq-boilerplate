@@ -1,0 +1,86 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#      _____ __  __  ___    ____  _______     __      #
+#     |_   _|  \/  |/ _ \  |  _ \| ____\ \   / /      #
+#       | | | |\/| | | | | | | | |  _|  \ \ / /       #
+#       | | | |  | | |_| | | |_| | |___  \ V /        #
+#       |_| |_|  |_|\__\_\ |____/|_____|  \_/         #
+#                                                     #
+#              Main Configuration File                #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Server Host
+# Domain name where the server is hosted
+host: "http://localhost/"
+
+# Bind Ip address
+bindIP: "0.0.0.0"
+
+# Rabbit MQ Configuration
+# Configuration for Rabbit MQ connection
+#rabbitmq:
+#  url: "amqp://root:pass@localhost:5672"
+
+# ETCD Configuration
+# Set URL connection string
+etcd: "http://127.0.0.1:2379"
+
+# GRPC Configuration
+# namespace: keyword for grouping services
+# service: name for the service
+grpc: 
+  namespace: "/tmq-dev-boilerplate"
+  service: "tmq"
+
+# Mongo DB Configuration
+# batchSize: Limits the number of documents returned in one batch. It can be adjusted to optimize performance and limit data transfer.
+mongodb:
+  batchSize: 1000
+
+# Google API Configuration
+# apiKey: Authentication key use to authorize Google APIs
+google:
+  apiKey: "AI************************************"
+
+# billing settings
+billing:
+  # stripe settings
+  stripe:
+    publishableKey: "pk_*****"
+    secretKey: "sk_*****"
+  #Payment History Configuration
+  # batchSize: Limits the number of documents returned in one batch.
+  paymentHistory:
+    batchSize: 50
+  invoice:
+    companyName: "ABC Company"
+    companyAddress: "123 Main St, San Francisco, CA 94111"
+    companyPhone: "(415) 555-1234"
+    companyEmail: ""
+    vat: "123456789" 
+
+# Email Setup
+# host: Email server host
+# port: Email server port
+# mask: Used to mask or display sender name
+# auth:
+#   username: Email to used for authentication
+#   password: Emaill password to authenticate
+email:
+  host: ""
+  port: 26
+  mask: "noreply@localhost.io"
+  auth:
+    username: ""
+    password: ""
+
+# WebRTC Configuration
+# iceServer: List of STUN servers to use for ICE negotiation
+media:
+  iceServer:
+    - urls: "stun:stun.l.google.com:19302"
+    - urls: "stun:stun1.l.google.com:19302"
+
+# CDN Configuration
+# url: URL to the CDN eg. keycdn.com
+cdn:
+  url: "https://cdn.tmq.io"

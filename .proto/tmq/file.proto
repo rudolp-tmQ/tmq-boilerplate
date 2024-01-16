@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option optimize_for = CODE_SIZE;
+
+import "tmq/common.proto";
+
+package tmq;
+
+message File {
+    string id = 1;
+    string name = 2;
+    string mimeType = 3;
+    string properties = 4;
+    string folderId = 5;
+    uint64 fileSize = 6;
+    uint64 dtCreated = 7;
+    uint64 dtModified = 8;
+    uint64 dtArchived = 9;
+    uint64 dtDeleted = 10;
+}
+
+message Folder {
+    string id = 1;
+    string name = 2;
+    string parentId = 3;
+    uint64 dtCreated = 4;
+    uint64 dtModified = 5;
+    string properties = 6;
+    repeated Folder folders = 7;
+    repeated File files = 8;
+}
+
+message FolderRequest {
+    string id = 1;
+    string name = 2;
+    string moveTo = 3;
+    string baseId = 5;
+    string searchKey = 6;
+    string sortFlag = 7;
+    string lastBasis = 8;
+    string searchBy = 9;
+    uint64 from = 10;
+    uint64 to = 11;
+    int32 modflag = 12;
+    repeated File files = 13;
+    ConnectionInfo clientinfo = 14;
+}
+
+service FolderManagerService {
+    rpc FetchFolder (FolderRequest) returns (Folder) {}
+    rpc AddFolder (FolderRequest) returns (Folder) {}
+    rpc RemoveFolder (FolderRequest) returns (Folder) {}
+    rpc RenameFolder (FolderRequest) returns (Folder) {}
+    rpc MoveFolder (FolderRequest) returns (Folder) {}
+    rpc AddFile (FolderRequest) returns (Folder) {}
+    rpc RenameFile (FolderRequest) returns (Folder) {}
+    rpc MoveFile (FolderRequest) returns (Folder) {}
+    rpc RemoveFile (FolderRequest) returns (Folder) {}
+    rpc ArchiveFile (FolderRequest) returns (Folder) {}
+}

@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+option optimize_for = CODE_SIZE;
+
+import "tmq/common.proto";
+
+package tmq;
+
+enum DHAnswerStatus {
+    GEN_OK = 0;
+    GEN_RETRY = 1;
+    GEN_FAIL = 2;
+}
+
+message VerifyRequest {
+    string userid = 1;
+    string route = 2;
+}
+
+message ClientPQ {
+    bytes nonce = 1;
+}
+
+message ServerPQ {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    bytes pq = 3;
+    repeated string spkf = 4;
+}
+
+message RequestDHParam {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    bytes p = 3;
+    bytes q = 4;
+    string fingerprint = 5;
+    bytes encryptedData = 6;
+}
+
+message DHParamData {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    bytes encryptedData = 3;
+}
+
+message PQInnerData {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    bytes newNonce = 3;
+    bytes pq = 4;
+    bytes p = 5;
+    bytes q = 6;
+}
+
+message DHServerInnerData {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    uint32 g = 3;
+    bytes dhPrime = 4;
+    bytes gA = 5;
+    uint64 serverTime = 6;
+}
+
+message DHClientInnerData {
+    bytes nonce = 1;
+    bytes serverNonce = 2;
+    bytes gb = 3;
+}
+
+message DHAnswer {
+    DHAnswerStatus status = 1;
+    bytes newNonceHash1 = 2;
+    bytes newNonceHash2 = 3;
+    bytes newNonceHash3 = 4;
+}
+
+message ConfigRequest {
+    bytes nonce = 1;
+    ConnectionInfo clientinfo = 2;
+}
+
+service CryptoService {
+    rpc RequestPQMulti (ClientPQ) returns (ServerPQ) {}
+    rpc RequestDH (RequestDHParam) returns (DHParamData) {}
+    rpc SetClientDH (DHParamData) returns (DHAnswer){}    
+}
+
+service CryptoPublish {
+    rpc GetConfig (ConfigRequest) returns (stream PublishResponse) {}
+}

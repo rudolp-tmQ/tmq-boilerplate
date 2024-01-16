@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option optimize_for = CODE_SIZE;
+
+import "tmq/common.proto";
+
+package tmq;
+
+message VCRequest {
+    string email = 1;
+    string sdp = 2;
+    string label = 3;
+    string candidate = 4;
+    bool isVideo = 5;
+    ConnectionInfo clientinfo = 6;
+}
+
+message VCConfig{
+    message ICEServer {
+        string url = 1;
+        string urls = 2;
+        string username = 3;
+        string credential = 4;
+    }
+    repeated ICEServer servers = 1;
+}
+
+service MediaService {    
+    rpc VCCreateRoom (VCRequest) returns (DefaultResponse) {}
+    rpc VCJoinRoom (VCRequest) returns (DefaultResponse) {}
+    rpc VCDialCall (VCRequest) returns (DefaultResponse) {}
+    rpc VCAnswerCall (VCRequest) returns (DefaultResponse) {}
+    rpc VCGetConfig (VCRequest) returns (VCConfig) {}
+    rpc VCSendICECandidate (VCRequest) returns (DefaultResponse) {}
+}

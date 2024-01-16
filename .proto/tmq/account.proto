@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+option optimize_for = CODE_SIZE;
+
+import "tmq/common.proto";
+
+package tmq;
+
+enum UserRoles {
+    NONE = 0x0;
+    STANDARD = 0x1;
+    MANAGER =  0x3DD7D;
+    OWNER = 0x4246FFFF;
+    SUPERUSER = 16777215;
+}
+
+message ProfileParam {
+    string displayName = 1;
+    string email = 2;
+    string phone = 3;
+    string address = 4;
+    string city = 5;
+    string state = 6;
+    string zip = 7;
+    string country = 8;
+    string website = 9;
+    string avatar = 10;
+    ConnectionInfo clientinfo = 11;
+    string otherProperties = 12;
+}
+
+message AccountParam {
+    string username = 1;
+    string password = 2;
+    string email = 3;
+    ProfileParam profile = 4;
+    ConnectionInfo clientinfo = 5;
+}
+
+message PasswordParam {
+    string token = 1;
+    string password = 2;
+    ConnectionInfo clientinfo = 5;
+}
+
+message BasicAccount {
+    ConnectionInfo clientinfo = 1;
+}
+
+message TokenResponse {
+    string token = 1;
+    string expires = 2;
+}
+
+message TokenRequest {
+    ConnectionInfo clientinfo = 1;
+}
+
+message UpdatePasswordRequest {
+    string oldPassword = 1;
+    string password = 2;
+    ConnectionInfo clientinfo = 3;
+}
+
+message CreateAccountRequest {
+    AccountParam account = 1;
+    Options options = 2;
+    ConnectionInfo clientinfo = 3;
+
+    message Options {
+        bool verificationIsCode = 1;
+        int32 codeDigits = 2;
+    }
+}
+
+message VerifyAccountRequest {
+    string token = 1;
+    string email = 2;
+    string code = 3;
+    bool sendUpdatePassword = 4;
+}
+
+
+service AccountService {
+    rpc NotifyLogout (BasicAccount) returns (DefaultResponse) {}
+    rpc RequestCreateAccount (CreateAccountRequest) returns (DefaultResponse) {}
+    rpc RequestResetPassword (AccountParam) returns (DefaultResponse) {}
+    rpc RequestUpdatePassword (PasswordParam) returns (DefaultResponse) {}
+    rpc RequestSendVerification (CreateAccountRequest) returns (DefaultResponse) {}    
+    rpc RequestUpdateProfile (ProfileParam) returns (DefaultResponse) {}    
+    rpc RequestUpdateAvatar (ProfileParam) returns (DefaultResponse) {}
+    rpc RequestGetToken(TokenRequest) returns (TokenResponse) {}
+    rpc UpdatePassword (UpdatePasswordRequest) returns (DefaultResponse) {}
+    rpc VerifyAccount (VerifyAccountRequest) returns (DefaultResponse) {}
+}
+
+service AccountPublish {
+    rpc GetUserInfo (BasicAccount) returns (stream PublishResponse) {}
+}
